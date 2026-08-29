@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>BUILDER — AI Venture Architect & Startup Builder</title>
+  
+  <!-- Tailwind CSS & Google Fonts -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons & Marked.js -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            dark: {
+              bg: '#0c1017',        // Deep matte dark slate
+              card: '#121824',      // Card background
+              border: '#1e293b',    // Border
+              input: '#0f141f',
+              amber: '#f59e0b',     // VisionTracker accent amber
+              amberLight: '#fbbf24',
+              muted: '#64748b',
+              text: '#f1f5f9'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #0c1017;
+      background-image: radial-gradient(#1e293b 0.75px, transparent 0.75px);
+      background-size: 20px 20px;
+      color: #f1f5f9;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #0c1017;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 4px;
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+  </style>
+</head>
+<body class="font-sans antialiased min-h-screen flex flex-col selection:bg-dark-amber selection:text-black">
+
+  <!-- TOP MINIMAL NAV -->
+  <header class="w-full max-w-6xl mx-auto pt-4 md:pt-6 px-4 md:px-6">
+    <div class="flex items-center justify-between gap-3 pb-3 border-b border-dark-border/40">
+      
+      <!-- Brand Logo -->
+      <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 bg-dark-card border border-dark-border px-3 py-1.5 rounded-full shadow-sm">
+          <div class="w-2 h-2 rounded-full bg-dark-amber animate-pulse"></div>
+          <span class="font-mono font-bold text-xs md:text-sm text-white tracking-wider">BUILDER</span>
+          <span class="font-mono text-[9px] text-dark-amber bg-dark-amber/10 border border-dark-amber/30 px-1.5 py-0.5 rounded font-semibold uppercase">AI Venture Architect</span>
+        </div>
+      </div>
+
+      <!-- New Venture CTA -->
+      <div class="flex items-center gap-2">
+        <button onclick="openNewVentureModal()" class="bg-dark-amber hover:bg-dark-amberLight text-black font-semibold px-3.5 py-1.5 rounded-full text-xs flex items-center gap-1.5 transition-all shadow-sm">
+          <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+          <span>New Venture</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- MAIN 2-COLUMN DASHBOARD -->
+  <main class="flex-1 w-full max-w-6xl mx-auto px-4 md:px-6 py-4 space-y-4">
+    
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+      
+      <!-- Left: Ventures List Sidebar (4 Cols) -->
+      <aside class="md:col-span-4 bg-dark-card border border-dark-border rounded-xl p-3 flex flex-col h-[600px]">
+        <div class="flex items-center justify-between pb-2 mb-2 border-b border-dark-border/60">
+          <span class="text-[10px] font-mono font-bold text-dark-amber uppercase flex items-center gap-1.5">
+            <i data-lucide="briefcase" class="w-3.5 h-3.5"></i> Startups & Ventures
+          </span>
+          <span id="ventureCountBadge" class="text-[9px] font-mono text-dark-muted">0 Startups</span>
+        </div>
+
+        <div id="ventureListContainer" class="flex-1 overflow-y-auto custom-scrollbar space-y-2 pr-1"></div>
+      </aside>
+
+      <!-- Right: AI Venture Workspace & Generator (8 Cols) -->
+      <section class="md:col-span-8 bg-dark-card border border-dark-border rounded-xl p-5 flex flex-col h-[600px] overflow-hidden">
+        
+        <!-- Active Venture Header -->
+        <div class="flex items-start justify-between pb-3 mb-3 border-b border-dark-border/60">
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 id="viewVentureName" class="text-lg font-bold text-white tracking-tight">Select a Startup</h2>
+              <span id="viewVentureStage" class="text-[9px] font-mono text-dark-amber bg-dark-amber/10 border border-dark-amber/30 px-1.5 py-0.2 rounded font-semibold uppercase">Idea</span>
+            </div>
+            <p id="viewVentureTagline" class="text-xs text-dark-muted mt-0.5 font-mono">Select a venture from the left or create a new one.</p>
+          </div>
+
+          <!-- AI Action Generators -->
+          <div class="flex items-center gap-1.5">
+            <button onclick="triggerAIGeneration('canvas')" class="bg-dark-input hover:bg-dark-border text-dark-amber border border-dark-amber/30 px-2.5 py-1.5 rounded-lg text-xs font-mono font-medium flex items-center gap-1 transition-all">
+              <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i> Canvas
+            </button>
+            <button onclick="triggerAIGeneration('pitch_deck')" class="bg-dark-input hover:bg-dark-border text-sky-400 border border-sky-400/30 px-2.5 py-1.5 rounded-lg text-xs font-mono font-medium flex items-center gap-1 transition-all">
+              <i data-lucide="presentation" class="w-3.5 h-3.5"></i> Pitch Deck
+            </button>
+            <button onclick="triggerAIGeneration('gtm')" class="bg-dark-input hover:bg-dark-border text-emerald-400 border border-emerald-400/30 px-2.5 py-1.5 rounded-lg text-xs font-mono font-medium flex items-center gap-1 transition-all">
+              <i data-lucide="rocket" class="w-3.5 h-3.5"></i> 90-Day GTM
+            </button>
+          </div>
+        </div>
+
+        <!-- Rendered Business Plan Markdown Pane -->
+        <div id="aiOutputPane" class="flex-1 overflow-y-auto custom-scrollbar prose prose-invert text-xs leading-relaxed max-w-none text-slate-200 bg-dark-bg/60 border border-dark-border/40 rounded-xl p-4">
+          <div class="text-dark-muted text-center flex flex-col items-center justify-center h-full font-mono text-xs py-12">
+            <i data-lucide="cpu" class="w-8 h-8 mb-2 opacity-30"></i>
+            <span>Click <b>Canvas</b>, <b>Pitch Deck</b>, or <b>90-Day GTM</b> above to generate a full venture blueprint with AI.</span>
+          </div>
+        </div>
+
+      </section>
+
+    </div>
+
+  </main>
+
+  <!-- JS LOGIC -->
+  <script>
+    let ventures = [];
+    let currentVentureId = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      loadVentures();
+    });
+
+    async function loadVentures() {
+      ventures = await fetch('/api/ventures').then(r => r.json());
+      document.getElementById('ventureCountBadge').innerText = `${ventures.length} Startups`;
+
+      const container = document.getElementById('ventureListContainer');
+      if (!ventures || ventures.length === 0) {
+        container.innerHTML = `<div class="text-dark-muted text-center py-12 font-mono text-xs">No ventures yet. Click + New Venture.</div>`;
+        return;
+      }
+
+      if (!currentVentureId && ventures.length > 0) {
+        currentVentureId = ventures[0].id;
+      }
+
+      container.innerHTML = ventures.map(v => `
+        <div onclick="selectVenture(${v.id})" class="p-3 rounded-xl cursor-pointer transition-all border ${v.id === currentVentureId ? 'bg-dark-amber/10 border-dark-amber/40 text-white' : 'bg-dark-input/60 border-dark-border/60 hover:border-dark-border text-slate-300'}">
+          <div class="flex items-center justify-between mb-1">
+            <span class="font-bold text-xs truncate max-w-[160px] ${v.id === currentVentureId ? 'text-dark-amber' : 'text-white'}">${v.name}</span>
+            <span class="text-[9px] font-mono text-dark-muted">${v.stage}</span>
+          </div>
+          <p class="text-[11px] text-dark-muted line-clamp-2 leading-tight">${v.tagline || v.summary || 'No summary'}</p>
+          <div class="mt-2 text-[9px] font-mono text-dark-amber/80 flex items-center justify-between">
+            <span>${v.industry} • ${v.business_model}</span>
+            <button onclick="event.stopPropagation(); deleteVentureItem(${v.id})" class="text-dark-muted hover:text-rose-400 p-0.5"><i data-lucide="trash-2" class="w-3 h-3"></i></button>
+          </div>
+        </div>
+      `).join('');
+
+      const active = ventures.find(v => v.id === currentVentureId);
+      if (active) {
+        populateWorkspace(active);
+      }
+      lucide.createIcons();
+    }
+
+    async function selectVenture(vid) {
+      currentVentureId = vid;
+      const v = await fetch(`/api/ventures/${vid}`).then(r => r.json());
+      populateWorkspace(v);
+      loadVentures();
+    }
+
+    function populateWorkspace(v) {
+      document.getElementById('viewVentureName').innerText = v.name;
+      document.getElementById('viewVentureStage').innerText = v.stage;
+      document.getElementById('viewVentureTagline').innerText = v.tagline || `${v.industry} • ${v.business_model}`;
+
+      const pane = document.getElementById('aiOutputPane');
+      if (v.modules && v.modules.length > 0) {
+        const lastMod = v.modules[v.modules.length - 1];
+        const contentObj = JSON.parse(lastMod.content_json);
+        pane.innerHTML = `
+          <div class="text-dark-amber font-mono text-xs font-bold mb-2 pb-1 border-b border-dark-border/40 flex items-center justify-between">
+            <span>${lastMod.title}</span>
+            <span class="text-dark-muted font-normal">${lastMod.created_at.slice(0, 16).replace('T', ' ')}</span>
+          </div>
+          ${marked.parse(contentObj.markdown || '')}
+        `;
+      } else {
+        pane.innerHTML = `
+          <div class="text-dark-muted text-center flex flex-col items-center justify-center h-full font-mono text-xs py-12">
+            <i data-lucide="cpu" class="w-8 h-8 mb-2 opacity-30"></i>
+            <span>Click <b>Canvas</b>, <b>Pitch Deck</b>, or <b>90-Day GTM</b> above to generate a full venture blueprint with AI.</span>
+          </div>
+        `;
+      }
+      lucide.createIcons();
+    }
+
+    async function triggerAIGeneration(type) {
+      if (!currentVentureId) return;
+      const pane = document.getElementById('aiOutputPane');
+      pane.innerHTML = `
+        <div class="text-center py-16 font-mono text-xs flex flex-col items-center justify-center text-dark-amber">
+          <i data-lucide="loader-2" class="w-6 h-6 animate-spin mb-3"></i>
+          <span>BUILDER AI is architecting your ${type.replace('_', ' ')}...</span>
+        </div>
+      `;
+      lucide.createIcons();
+
+      try {
+        const res = await fetch('/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ venture_id: currentVentureId, module_type: type })
+        }).then(r => r.json());
+
+        pane.innerHTML = `
+          <div class="text-dark-amber font-mono text-xs font-bold mb-2 pb-1 border-b border-dark-border/40">
+            ${res.title}
+          </div>
+          ${marked.parse(res.content)}
+        `;
+      } catch (err) {
+        pane.innerHTML = `<span class="text-rose-400 font-mono">Error generating business plan: ${err}</span>`;
+      }
+    }
+
+    async function openNewVentureModal() {
+      const name = prompt('Startup / Venture Name:');
+      if (!name) return;
+      const industry = prompt('Industry (e.g. AI SaaS, FinTech, E-commerce, HealthTech):', 'AI SaaS');
+      const target = prompt('Target Customer (e.g. B2B Founders, Freelancers):', 'Developers');
+      const summary = prompt('One-paragraph problem & solution summary:');
+
+      const res = await fetch('/api/ventures', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: name.trim(),
+          industry: industry || 'Tech',
+          target_market: target || 'B2B',
+          summary: summary || '',
+          business_model: 'SaaS',
+          stage: 'Idea'
+        })
+      }).then(r => r.json());
+
+      currentVentureId = res.id;
+      loadVentures();
+    }
+
+    async function deleteVentureItem(vid) {
+      if (!confirm('Delete this venture permanently?')) return;
+      await fetch(`/api/ventures/${vid}`, { method: 'DELETE' });
+      currentVentureId = null;
+      loadVentures();
+    }
+  </script>
+</body>
+</html>
